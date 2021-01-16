@@ -2,7 +2,6 @@ importClass(Packages.ij.IJ);
 
 function abrirImg(name){
     //carpeta donde estan las imagenes a procesar
-    //getDir("Choose a Directory");
     var input = "C:/work/InvestigacionKIWI/imageJ/imagenes/";
 
     //abrir imagen
@@ -25,15 +24,31 @@ function extraer(img, fromX, fromY, width, height){
     return img2;
 }
 
+function coordFactory(x, y, w, h){
+    var obj= {};
+    obj.x= x;
+    obj.y= y;
+    obj.w= w;
+    obj.h= h;
+    return obj;
+}
 
 function main(){
-    var img = abrirImg("RGB.png");
+    var inputImg = "RGB.png";
+    var arrCord = [coordFactory(0, 0, 20, 20), 
+        coordFactory(20, 0, 20, 20), 
+        coordFactory(40, 0, 20, 20)];
 
-    var img2 = extraer(img, 0, 0, 300, 400);
+    var outputName = "-test";
 
-    img2.show();
+    var img = abrirImg(inputImg);
 
-    guardarImg(img2, "prueba extraccion");
+    for(var i in arrCord){
+        var c = arrCord[i];
+        var img2 = extraer(img, c.x, c.y, c.w, c.h);
+        img2.show();
+        guardarImg(img2, i+outputName);
+    }
 }
 
 main();
