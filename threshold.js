@@ -38,15 +38,3 @@ close();
 selectWindow("Result of Result of 0");
 rename(a);
 // Colour Thresholding-------------
-
-
-
-/*
-    FORK:
-    1- Copiar Recortador.js, sin el guardar imagen
-    2- Refactorear para que la dimension sea 7x7 o 9x9
-    3- Analizar el recorte y guardar el min, media y max de original
-    4- Exportar archivo en forma de tabla del siguiente formato:
-        | nro recorte | minima | media | maxima |
-    5- Tambien analizar el min, media y max del R/G y del RO, exportar del mismo formato?
-*/

@@ -9,7 +9,7 @@ function abrirImg(path){
 
 
 //---Salvar la imagen en determinado directorio
-function guardarImg(img, output, name){ IJ.saveAs(img, "Tiff", output+name) }
+function guardarImg(img, format, output, name){ IJ.saveAs(img, format, output+name) }
 
 
 //---Funcion recortadora a partir de una imagen y una coordenada
@@ -56,10 +56,11 @@ function esperar(cadena){
 function definirOutput(){
     var gd = new GenericDialog("Selector");
     gd.addDirectoryField("Seleccione la Carpeta de Salidas", null);
-    gd.addStringField("Seleccione el Nombre de los Archivos de Salida", "-salida");
+    gd.addStringField("Seleccione el Nombre de las Salida", "-salida");
+    gd.addChoice("Seleccione el Formato de Salida",["Png", "Tiff", "Raw"], "");    
 
     gd.showDialog();
-    return [gd.getNextString(), gd.getNextString()];
+    return [gd.getNextString(), gd.getNextString(), gd.getNextChoice()];
 }
 
 
@@ -78,12 +79,18 @@ function main(){
     var img = seleccionarImg();
 
     //--------- Obtener los puntos marcados o esperar a que sean marcados
-    try{ var points = img.getRoi().getContainedPoints() }
+    try{ 
+        var points = img.getRoi().getContainedPoints(); 
+        if(img.getRoi().getType() != 10) throw true;
+    }
     catch(err){
         IJ.setTool("multipoint");
         esperar("Seleccione los puntos requeridos y luego presione OK");
     } 
-    finally{ var points = img.getRoi().getContainedPoints() }
+    finally{ 
+        var points = img.getRoi().getContainedPoints();
+        if(img.getRoi().getType() != 10) throw "La seleccion debe ser de Puntos! no de Areas/Lineas!";
+    }
 
     //--------- Crear vector de coordenadas 
     var arrCord = new Array(); 
@@ -93,13 +100,14 @@ function main(){
     var outputsArr = definirOutput();
     var outputDir = outputsArr[0];
     var outputName = outputsArr[1];
+    var outputFormat = outputsArr[2];
 
     //--------- Recorrer coordenadas, recortar y guardar
     for(var i in arrCord){
         var img2 = extraer(img, arrCord[i]);
         if(img2){
             img2.show();
-            guardarImg(img2, outputDir, i+outputName);
+            guardarImg(img2, outputFormat, outputDir, i+outputName);
         }
     }
 }
