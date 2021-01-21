@@ -25,11 +25,11 @@ function extraer(img, fromX, fromY, width, height){
 }
 
 function coordFactory(x, y, w, h){
-    var obj= {};
-    obj.x= x;
-    obj.y= y;
-    obj.w= w;
-    obj.h= h;
+    var obj = {};
+    obj.x = x;
+    obj.y = y;
+    obj.w = w;
+    obj.h = h;
     return obj;
 }
 
