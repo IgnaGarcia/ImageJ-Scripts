@@ -202,6 +202,8 @@ function main(){
     //--------- Recorrer directorio, recortar y resumir
     toTable(resumenesCos, "Red/Green");
     toTable(resumenesRo, "Ro");
+
+    img.close();
 }
 
 main();
