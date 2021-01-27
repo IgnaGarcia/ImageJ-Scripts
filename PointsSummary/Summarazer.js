@@ -10,15 +10,9 @@ function abrirImg(path){
 
 //---Funcion recortadora a partir de una imagen y una coordenada
 function extraer(img, coord){
-    if((coord.x - 4 < 0) || 
-        (coord.y - 4 < 0) || 
-        (coord.x + 4 >= img.getWidth()) || 
-        (coord.y + 4 >= img.getHeight())) return false;
-    else{
-        img.setRoi(coord.x - 4, coord.y - 4, coord.w, coord.h);
-        img2 = img.resize(coord.w, coord.h, "bilinear");
-        return img2;
-    }
+    img.setRoi(coord.x - 4, coord.y - 4, coord.w, coord.h);
+    img2 = img.resize(coord.w, coord.h, "bilinear");
+    return img2;
 }
 
 
@@ -36,7 +30,7 @@ function imgToArray(img){
 }
 
 
-//---Funcion que calcula el coseno de Rojo/Verde
+//---Funcion que calcula Rojo/Verde
 function rSobreG(imgArr){
     var res = new Array();
     for(var h=0; h<imgArr.length; h++){
@@ -85,12 +79,37 @@ function calcMinMaxMed(imgArr, nroRecorte){
 }
 
 
+//---Funcion que calcula el min, max y media absoluta
+function calcMinMaxMedAbsoluta(resumen){
+    var min, max;
+    var sum = 0;
+    var count = 0;
+
+    for(var i=0; i<resumen.length; i++){
+        count++;
+        sum+= resumen[i].media;
+        if(min === undefined) min = resumen[i].minima;
+        else if(min > resumen[i].minima) min = resumen[i].minima;
+
+        if(max === undefined) max = resumen[i].maxima;
+        else if(max < resumen[i].maxima) max = resumen[i].maxima;
+    }
+    return resumenFactory("Absoluta", min, max, sum/count);
+}
+
+
 //---Transforma el Resumen en table
 function toTable(resumen, nombre){
     var tabla = new ResultsTable();
 
+    var absoluta = calcMinMaxMedAbsoluta(resumen)
+    tabla.addValue("Recorte Nro", absoluta.nro);
+    tabla.addValue("Minima", absoluta.minima);
+    tabla.addValue("Media", absoluta.media);
+    tabla.addValue("Maxima", absoluta.maxima);
+
     for(var res in resumen){
-        if(res != 0) tabla.addRow();
+        tabla.addRow();
         tabla.addValue("Recorte Nro", resumen[res].nro);
         tabla.addValue("Minima", resumen[res].minima);
         tabla.addValue("Media", resumen[res].media);
@@ -115,36 +134,24 @@ function resumir(img, i){
 
 
 //---Caja de dialogo para seleccionar el input
-function seleccionarImg(){
+function seleccionarInputDir(){
     var gd = new NonBlockingGenericDialog("Selector"); 
-
-    try{ gd.addImageChoice("Seleccione la Imagen ", null) }
-    catch(err){ gd.addFileField("O ", null) } 
-    finally{ 
-        gd.hideCancelButton();
-        gd.showDialog();
-
-        var path = gd.getNextString()
-        if(path) return abrirImg(path)
-        return gd.getNextImage()
-    }
-}
-
-
-//---Funcion que espera a que el usuario realize una tarea
-function esperar(cadena){
-    var gd = new NonBlockingGenericDialog("");
-    gd.addMessage(cadena);
+    gd.addFileField("Seleccione la Imagen ", null)
+    gd.addMessage("Esta debe ser la primera del directorio a recorrer")
     gd.hideCancelButton();
     gd.showDialog();
+
+    var path = gd.getNextString()
+    if(path) return abrirImg(path)
+    return gd.getNextImage()
 }
 
 
 //---Constructor de Coordenadas
-function coordFactory(xCenter, yCenter){
+function coordFactory(){
     var obj = {};
-    obj.x = xCenter;
-    obj.y = yCenter;
+    obj.x = 17;
+    obj.y = 17;
     obj.w = 9;
     obj.h = 9;
     return obj;
@@ -172,38 +179,27 @@ function resumenFactory(i, min, max, med){
 
 
 function main(){
-    var img = seleccionarImg();
+    var img = seleccionarInputDir();
+    var firstName = img.getTitle();
 
-    //--------- Obtener los puntos marcados o esperar a que sean marcados
-    try{ 
-        var points = img.getRoi().getContainedPoints(); 
-        if(img.getRoi().getType() != 10) throw true;
-    }
-    catch(err){
-        IJ.setTool("multipoint");
-        esperar("Seleccione los puntos requeridos y luego presione OK");
-    } 
-    finally{ 
-        var points = img.getRoi().getContainedPoints();
-        if(img.getRoi().getType() != 10) throw "La seleccion debe ser de Puntos! no de Areas/Lineas!";
-    }
+    var i = 0;
 
-    //--------- Crear vector de coordenadas 
-    var arrCord = new Array(); 
-    for(var i in points){ arrCord.push(coordFactory(points[i].x, points[i].y)) }
-
-    //--------- Recorrer coordenadas, recortar y guardar
     var resumenesCos = new Array();
     var resumenesRo = new Array();
 
-    for(var i in arrCord){
-        var recorte = extraer(img, arrCord[i]);
+    do{
+        var recorte = extraer(img, coordFactory());
         if(recorte){
             var resumenes = resumir(recorte, i);
             resumenesCos.push(resumenes[0]);
             resumenesRo.push(resumenes[1]);
         }
-    }
+
+        IJ.run(img, "Open Next", "");
+        i++;
+    }while(firstName != img.getTitle())
+
+    //--------- Recorrer directorio, recortar y resumir
     toTable(resumenesCos, "Red/Green");
     toTable(resumenesRo, "Ro");
 }

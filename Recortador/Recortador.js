@@ -30,16 +30,16 @@ function extraer(img, coord){
 function seleccionarImg(){
     var gd = new NonBlockingGenericDialog("Selector"); 
 
-    try{ gd.addImageChoice("Seleccione la Imagen ", null) }
-    catch(err){ gd.addFileField("O ", null) } 
-    finally{ 
-        gd.hideCancelButton();
-        gd.showDialog();
+    gd.addFileField("Busque la imagen ", null);
+    try{gd.addImageChoice("O seleccionela ", null);}
+    catch(err){}
 
-        var path = gd.getNextString()
-        if(path) return abrirImg(path)
-        return gd.getNextImage()
-    }
+    gd.hideCancelButton();
+    gd.showDialog();
+
+    var path = gd.getNextString()
+    if(path) return abrirImg(path)
+    return gd.getNextImage()
 }
 
 
