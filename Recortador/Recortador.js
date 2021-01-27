@@ -14,10 +14,10 @@ function guardarImg(img, format, output, name){ IJ.saveAs(img, format, output+na
 
 //---Funcion recortadora a partir de una imagen y una coordenada
 function extraer(img, coord){
-    if((coord.x - 15 < 0) || 
-        (coord.y - 15 < 0) || 
-        (coord.x + 15 >= img.getWidth()) || 
-        (coord.y + 15 >= img.getHeight())) return false;
+    if((coord.x - 16 < 0) || 
+        (coord.y - 16 < 0) || 
+        (coord.x + 16 >= img.getWidth()) || 
+        (coord.y + 16 >= img.getHeight())) return false;
     else{
         img.setRoi(coord.x -15, coord.y - 15, coord.w, coord.h);
         img2 = img.resize(coord.w, coord.h, "bilinear");
@@ -56,7 +56,7 @@ function esperar(cadena){
 function definirOutput(){
     var gd = new GenericDialog("Selector");
     gd.addDirectoryField("Seleccione la Carpeta de Salidas", null);
-    gd.addStringField("Seleccione el Nombre de las Salida", "-salida");
+    gd.addStringField("Texto agregado a la salida", "salida");
     gd.addChoice("Seleccione el Formato de Salida",["Png", "Tiff", "Raw"], "");    
 
     gd.showDialog();
@@ -69,15 +69,15 @@ function coordFactory(xCenter, yCenter){
     var obj = {};
     obj.x = xCenter;
     obj.y = yCenter;
-    obj.w = 31;
-    obj.h = 31;
+    obj.w = 33;
+    obj.h = 33;
     return obj;
 }
 
 
 function main(){
     var img = seleccionarImg();
-
+    
     //--------- Obtener los puntos marcados o esperar a que sean marcados
     try{ 
         var points = img.getRoi().getContainedPoints(); 
@@ -99,7 +99,7 @@ function main(){
     //--------- Obtener direccion del output
     var outputsArr = definirOutput();
     var outputDir = outputsArr[0];
-    var outputName = outputsArr[1];
+    var outputName = img.getTitle().slice(0, -4)+"_"+outputsArr[1];
     var outputFormat = outputsArr[2];
 
     //--------- Recorrer coordenadas, recortar y guardar
@@ -107,7 +107,8 @@ function main(){
         var img2 = extraer(img, arrCord[i]);
         if(img2){
             img2.show();
-            guardarImg(img2, outputFormat, outputDir, i+outputName);
+            guardarImg(img2, outputFormat, outputDir, outputName+"_"+i);
+            img2.close();
         }
     }
 }

@@ -37,12 +37,12 @@ function imgToArray(img){
 
 
 //---Funcion que calcula el coseno de Rojo/Verde
-function cosRsobreG(imgArr){
+function rSobreG(imgArr){
     var res = new Array();
     for(var h=0; h<imgArr.length; h++){
         var row = new Array();
         for(var w=0; w<imgArr[0].length; w++){
-            row.push(Math.cos(imgArr[w][h].R / imgArr[w][h].G))
+            row.push(imgArr[w][h].R / imgArr[w][h].G)
         }
         res.push(row);
     }
@@ -56,7 +56,7 @@ function ro(imgArr){
     for(var h=0; h<imgArr.length; h++){
         var row = new Array();
         for(var w=0; w<imgArr[0].length; w++){
-            row.push(Math.sqrt(Math.pow(imgArr[w][h].R, 2) + Math.pow(imgArr[w][h].G, 2) + Math.pow(imgArr[w][h].B, 2)))
+            row.push(Math.sqrt((imgArr[w][h].R * imgArr[w][h].R) + (imgArr[w][h].G * imgArr[w][h].G) + (imgArr[w][h].B * imgArr[w][h].B)))
         }
         res.push(row);
     }
@@ -104,7 +104,7 @@ function toTable(resumen, nombre){
 function resumir(img, i){
     var arr = imgToArray(img);
 
-    var cosRes = cosRsobreG(arr);
+    var cosRes = rSobreG(arr);
     var resumenCos = calcMinMaxMed(cosRes, i);
 
     var roRes = ro(arr);
